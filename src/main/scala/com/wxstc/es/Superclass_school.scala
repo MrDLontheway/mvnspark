@@ -43,7 +43,7 @@ object Superclass_school {
       println(x)
     })
     println(school.count())
-    school.saveToEs("test/school")
+//    school.saveToEs("test/school")
 //    school.toDF().createOrReplaceTempView("school")
 //    val df2 = sql(
 //      """
