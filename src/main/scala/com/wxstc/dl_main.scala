@@ -1,16 +1,15 @@
 package com.wxstc
 
-import com.wxstc.es.{Superclass_school, Superclass_school2}
-import org.apache.spark.SparkConf
-import org.apache.spark.sql.SparkSession
+import com.wxstc.lagou.LagoujobHbase
 
 /**
   * 任务提交主入口
   */
 object dl_main {
   def main(args: Array[String]): Unit = {
-    Superclass_school.getSchoolDF()
-    Superclass_school2.getSchoolDF()
+//    Superclass_school.getSchoolDF()
+//    Superclass_school2.getSchoolDF()
+    LagoujobHbase.lagoujobToHbase()
   }
 
 }
