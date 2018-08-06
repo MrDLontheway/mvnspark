@@ -119,6 +119,7 @@ class KafkaManager(val kafkaParams: Map[String, String]) extends Serializable {
       val o = kc.setConsumerOffsets(groupId, Map((topicAndPartition, offsets.untilOffset)))
       if (o.isLeft) {
         println(s"Error updating the offset to Kafka cluster: ${o.left.get}")
+        throw new SparkException(s"Error updating the offset to Kafka cluster: ${o.left.get}")
       }
     }
   }

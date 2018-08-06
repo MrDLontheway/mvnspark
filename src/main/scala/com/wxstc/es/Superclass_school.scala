@@ -37,12 +37,14 @@ object Superclass_school {
         val level = x.getString("level")
         val schoolnature  = x.getString("schoolnature")
         val guanwang = x.getString("guanwang")
-        SchoolInfo(id,number,schoolName,province,level,schoolnature,guanwang)
+        (id,schoolName)
       })
-    school.map(x=>{
-      println(x)
-    })
-    println(school.count())
+
+
+//    school.map(x=>{
+//      println(x)
+//    })
+    println(school.collect().toBuffer)
 //    school.saveToEs("test/school")
 //    school.toDF().createOrReplaceTempView("school")
 //    val df2 = sql(

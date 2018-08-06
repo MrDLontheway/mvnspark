@@ -1,6 +1,7 @@
 package com.wxstc.streaming
 
 //import com.wxstc.util.LoggerLevels
+import com.wxstc.util.JDBCUtils
 import org.apache.log4j.Level
 import org.apache.spark.{HashPartitioner, SparkConf, SparkContext}
 import org.apache.spark.streaming.{Seconds, StreamingContext}

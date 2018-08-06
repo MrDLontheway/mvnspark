@@ -56,7 +56,6 @@ object DyDanMuDirect {
 
     val messages = km.createDirectStream[String, String, StringDecoder, StringDecoder](
       ssc, kafkaParams, topicsSet)
-
     messages.foreachRDD(rdd => {
       if (!rdd.isEmpty()) {
         // 先处理消息
