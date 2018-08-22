@@ -2,7 +2,7 @@ package com.wxstc.bean;
 
 import java.io.Serializable;
 
-public class LaGouJob implements Serializable{
+public class LaGouJob implements Serializable,Comparable<LaGouJob>{
     public long id;
     public String job_name;
     public String salary;
@@ -134,5 +134,10 @@ public class LaGouJob implements Serializable{
                 ", label='" + label + '\'' +
                 ", date='" + date + '\'' +
                 '}';
+    }
+
+    @Override
+    public int compareTo(LaGouJob o) {
+        return 0;
     }
 }

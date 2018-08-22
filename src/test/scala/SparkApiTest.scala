@@ -1,23 +1,25 @@
 import java.text.SimpleDateFormat
 import java.util.Date
 
+import com.wxstc.lagou.LagoujobHbase.spark
 import com.wxstc.mypartitioner.MyPartitioner
 import com.wxstc.util.JDBCUtils
-import org.apache.spark.{SparkConf, SparkException}
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.{HashPartitioner, SparkConf, SparkException}
+import org.apache.spark.sql.{SparkSession, functions}
+import org.apache.spark.storage.StorageLevel
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
 object SparkApiTest {
-  def main(args: Array[String]) {
+  //创建SparkConf()并设置App名称 .setMaster("local[3]")
+  val conf = new SparkConf().setAppName("apitest").setMaster("local[*]")//.setMaster("spark://47.94.196.195:7077")
+  //.set("spark.executor.memory", "512m")//.setJars(Array("C:\\Users\\L\\Desktop\\mayun\\mvnspark\\target\\mvn-spark-1.0-SNAPSHOT.jar"))
+  //创建SparkContext，该对象是提交spark App的入口
+  val spark = SparkSession.builder().config(conf)
+    .config("spark.task.maxFailures",2).getOrCreate()
+  def main2(args: Array[String]) {
     System.setProperty("HADOOP_USER_NAME", "root")
-    //创建SparkConf()并设置App名称 .setMaster("local[3]")
-    val conf = new SparkConf().setAppName("apitest").setMaster("local[*]")//.setMaster("spark://47.94.196.195:7077")
-    //.set("spark.executor.memory", "512m")//.setJars(Array("C:\\Users\\L\\Desktop\\mayun\\mvnspark\\target\\mvn-spark-1.0-SNAPSHOT.jar"))
-    //创建SparkContext，该对象是提交spark App的入口
-    val spark = SparkSession.builder().config(conf)
-        .config("spark.task.maxFailures",2).getOrCreate()
     val myBroad = Array(1,2,3,4,5,6,7)
     //sc.broadcast()
 //    val rdd1 = spark.sparkContext.parallelize(
@@ -83,7 +85,7 @@ object SparkApiTest {
       Tuple2(5,"16"),
       Tuple2(1,"85")
     ).toBuffer
-    for(i <- 1 until 10000){
+    for(i <- 1 until 5000){
       numType.append((9,"heiheia"))
     }
     val DBName=Array(
@@ -102,31 +104,56 @@ object SparkApiTest {
       Tuple2(5,"heiheia"),
         Tuple2(6,"aaa"),
         Tuple2(7,"cccc")
-
     )
+
+
 
     val rdda = spark.sparkContext.parallelize(numType,3)
     val rddn = spark.sparkContext.parallelize(DBName,3)
     val rddn2 = spark.sparkContext.parallelize(DBName2,3)
     val re = rdda.cogroup(rdda,rddn2)//.map((_._2))
 
+    val tmp = rddn.join(rddn2)
+    println(tmp.collect().toBuffer)
 
-    try {
-      rddn2.foreachPartition(it=>{
-        if(Thread.currentThread().getName.equals("Executor task launch worker-1")){
-          throw new NullPointerException("aa")
-        }
-        println(Thread.currentThread().getName+"==========")
-        val conn = JDBCUtils.getConnection
-        while (it.hasNext){
-          val i = it.next()
-        }
-        conn.close()
-      })
-    }catch {
-      case e:Exception =>{}
-    }
+//    try {
+//      rddn2.foreachPartition(it=>{
+//        if(Thread.currentThread().getName.equals("Executor task launch worker-1")){
+//          throw new NullPointerException("aa")
+//        }
+//        println(Thread.currentThread().getName+"==========")
+//        val conn = JDBCUtils.getConnection
+//        while (it.hasNext){
+//          val i = it.next()
+//        }
+//        conn.close()
+//      })
+//    }catch {
+//      case e:Exception =>{}
+//    }
+//    val timepoint = new Date().getTime
+//    val rdda2 = rdda.partitionBy(new HashPartitioner(3));
+//    rdda2.collect();
+//    val timepoint2 = new Date().getTime
+//    println("repartion times:"+(timepoint2-timepoint)/1000+"s")
 
+//    rdda.foreachPartition(it=>{
+//      println(it.size)
+//      it
+//    })
+    val r = new Random()
+    val restmp = rdda.map(x=>{(x._1+","+r.nextInt(10),x._2)}).groupByKey(10)
+//      .map(x=>{
+//      (x._1.split(",")(0),x._2)
+//    })
+//    val restmp = rdda.groupByKey(10);
+
+    restmp.foreachPartition(it=>{
+      println(it.size)
+    })
+
+    println(restmp.count())
+    println((new Date().getTime-spark.sparkContext.startTime)/1000+"s")
 
 
     /*rdda.map(x=>{
@@ -150,6 +177,7 @@ object SparkApiTest {
     }).collect()*/
     println(res.size)
     println(res2.size)
+
 //    println("shuffle------------------")
 //    val myres = tm1.groupBy(_._1).map(x=>{
 //      (x._1.substring(1,x._1.length),x._2.size)
@@ -178,6 +206,56 @@ object SparkApiTest {
     spark.sparkContext.stop()
   }
 
+  def testsql(): Unit ={
+    import spark.implicits._
+    val rdd2 = spark.sparkContext.parallelize(Seq(
+      Order(112387,"iphone 7","2011-01-05",BigDecimal.apply(4388),0.8,10),
+      Order(8873,"iphone x","2017-04-02",BigDecimal.apply(8888),0.75,2),
+      Order(99087,"mi 5","2016-09-01",BigDecimal.apply(1500),0.6,3),
+      Order(7996,"watch","2016-05-01",BigDecimal.apply(200),0.4,1)
+    ))
+
+    val rdd1 = spark.sparkContext.parallelize(
+          Seq(User(1,"tom",10,"2016-05-01"),
+              User(2,"jerry",12,"2014-02-09"),
+              User(3,"jack",15,"2016-05-28"),
+              User(7,"lala",15,"2016-05-28")
+          ))
+
+    val d2df = rdd2.toDF()
+    val d1df = rdd1.toDF()
+
+    d1df.createOrReplaceTempView("user")
+    d2df.createOrReplaceTempView("order")
+
+    val tmp1 = spark.sql(
+      """
+        |select id
+        |from user
+      """.stripMargin)
+    tmp1.persist().show()
+    spark.sqlContext.cacheTable("user")
+    val res = spark.sql(
+      """
+        |select *
+        |from order
+      """.stripMargin)
+    val tmpd = functions.broadcast(tmp1)
+    val rr = res.col("create_user")===tmpd.col("id")
+    println(rr)
+    res.join(tmpd,rr,"leftsemi").show()
+//
+//    val tmp2 = spark.sql(
+//      """
+//        |select *
+//        |from user
+//      """.stripMargin).join(res).show()
+  }
+
+  def main(args: Array[String]): Unit = {
+//    main2(Array())
+      testsql();
+  }
   case class User(id:Int,
                   name:String,
                   age:Int,

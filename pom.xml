@@ -13,7 +13,7 @@
         <spark.version>1.6.0</spark.version>
         <scala.version>2.10</scala.version>
         <hadoop.version>2.6.1</hadoop.version>-->
-        <!--<scala.version>2.11.8</scala.version>-->
+        <scala.version>2.11.8</scala.version>
         <scala.version>2.11</scala.version>
         <hadoop.version>2.6.0</hadoop.version>
         <spark.version>2.1.0</spark.version>
@@ -58,6 +58,13 @@
             <artifactId>spark-sql_${scala.version}</artifactId>
             <version>${spark.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.spark/spark-mllib -->
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-mllib_${scala.version}</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-hive_${scala.version}</artifactId>
