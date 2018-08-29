@@ -3,7 +3,7 @@ import kafka.serializer.StringDecoder
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.SparkConf
 import org.apache.spark.rdd.RDD
-import org.apache.spark.streaming.kafka.{KafkaManager, KafkaUtils}
+import org.apache.spark.streaming.kafka.{KafkaManager}
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 object DyDanMuDirect {
   /*  def dealLine(line: String): String = {

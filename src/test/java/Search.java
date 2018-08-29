@@ -1,8 +1,6 @@
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class Search {
     public Integer[] data = new Integer[]{1,2,3,4,5,6,7,8,9,10,77,99};
@@ -10,23 +8,20 @@ public class Search {
     public Integer[] data3 = new Integer[]{2,1,4,2,2,2,2,1,3};
     public Random r = new Random();
 
-    @Test
+    //@Test
     public void maxProfit() throws Exception {
-        int[] nums = new int[]{7, 1, 5, 3, 6, 4};
+        int[] nums = new int[]{-1,0,1,2,-1,-4};
         int k = 3;
-
-        Integer a = 9821360;
-
-        String s = "";
-//        char[] chars = a.toString().replace("0","").toCharArray();
-//        for(int i=0;i<chars.length/2;i++){
-//            if(chars[i]=='-'||(chars[i]=='0'&&chars.length<2)){
-//                continue;
-//            }
-//            char tmp = chars[i];
-//            chars[i] = chars[chars.length-1-i];
-//            chars[chars.length-1-i] = tmp;
-//        }
+        String s = "tree";
+        char[] chars = s.toCharArray();
+        Map map = new HashMap();
+        for(char i:chars){
+            int o = map.get(i)==null?1: (int) map.get(i);
+            o++;
+            map.put(i,o);
+        }
+        map.values().toArray();
+        Arrays.sort(nums);
         System.out.println(String.valueOf(1));
     }
 
@@ -51,6 +46,12 @@ public class Search {
     public void quicksortMiddle(){
         Integer[] randBigData = getRandBigData();
         quickSortByMid(randBigData,0,randBigData.length-1);
+    }
+
+    @Test
+    public void DualPivotQuicksort(){
+        Integer[] randBigData = getRandBigData();
+        Arrays.sort(randBigData);
     }
 
     public int binarysearch(Integer[] data,int begin,int last,int value){
@@ -200,7 +201,7 @@ public class Search {
 
     public Integer[] getRandBigData(){
         List<Integer> l = new ArrayList<>();
-        for(int i=0;i<500000;i++){
+        for(int i=0;i<500;i++){
             l.add(r.nextInt(1000000));
         }
         return l.toArray(new Integer[0]);
@@ -258,5 +259,27 @@ public class Search {
         //递归调用，排序左子集合和右子集合
         quickSortComparable(arr,low,i-1);
         quickSortComparable(arr,i+1,high);
+    }
+
+    @Test
+    public void tst1(){
+        for (int i=0;i<1000000;i++){
+            int a = 8;
+            int b = a/8;
+        }
+    }
+
+    @Test
+    public void tst2(){
+//        for (int i=0;i<1000000;i++){
+//            int a = 8;
+//            int b = a >> 3;
+//        }
+
+        int left = 0;
+        int right = 8;
+
+        System.out.println((left+right)>>>1);
+        System.out.println((left+right)/2);
     }
 }

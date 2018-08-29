@@ -2,7 +2,10 @@ package com.wxstc.streaming
 
 //import com.wxstc.util.LoggerLevels
 import com.wxstc.util.JDBCUtils
-import org.apache.log4j.Level
+import kafka.serializer.StringDecoder
+import org.apache.log4j.{Level, Logger}
+import org.apache.spark.storage.StorageLevel
+import org.apache.spark.streaming.kafka.{KafkaManager}
 import org.apache.spark.{HashPartitioner, SparkConf, SparkContext}
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
@@ -15,13 +18,40 @@ object StreamingWordCount {
     val conf = new SparkConf().setAppName("StreamingWordCount").setMaster("local[2]")
     val sc = new SparkContext(conf)
     val ssc = new StreamingContext(sc,Seconds(5))
-    ssc.checkpoint("F:\\_vm\\ck")
+
+    if (args.length < 3) {
+      System.err.println(
+        s"""
+           |Usage: DirectKafkaWordCount <brokers> <topics> <groupid>
+           |  <brokers> is a list of one or more Kafka brokers
+           |  <topics> is a list of one or more kafka topics to consume from
+           |  <groupid> is a consume group
+           |
+        """.stripMargin)
+      System.exit(1)
+    }
+
+    Logger.getLogger("org").setLevel(Level.WARN)
+
+    val Array(brokers, topics, groupId) = args
+    val topicsSet = topics.split(",").toSet
+    val kafkaParams = Map[String, String](
+      "metadata.broker.list" -> brokers,
+      "group.id" -> groupId,
+      "auto.offset.reset" -> "smallest"
+      //,"zookeeper.connect" -> ""
+    )
+    val km = new KafkaManager(kafkaParams)
+    ssc.checkpoint("D:\\_vm\\ck")
     //socket 接收数据 127.0.0.1
-    val ds = ssc.socketTextStream("127.0.0.1",8888)
-    val resDS = ds.flatMap(_.split(" ")).map((_,1))//.reduceByKey(_+_)
-    val result = resDS.updateStateByKey(updateFunc, new HashPartitioner(ssc.sparkContext.defaultParallelism), true)
-    resDS.print()
-    println(resDS)
+
+    val messages = km.createDirectStream[String, String, StringDecoder, StringDecoder](
+      ssc, kafkaParams, topicsSet)
+
+//    val Array(zkQuorum, group, topics, numThreads) = args
+//    val topicMap = topics.split(",").map((_, numThreads.toInt)).toMap
+//    val messages = KafkaUtils.createStream(ssc, zkQuorum, group, topicMap, StorageLevel.MEMORY_AND_DISK_SER)
+    messages.print()
     ssc.start()
     ssc.awaitTermination()
   }

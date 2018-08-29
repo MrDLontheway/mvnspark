@@ -7,17 +7,18 @@ public class CollectionsTest {
     @Test
     public void linkedlist(){
         /**
-         * LinkedList 是线程不安全的，允许元素为null的双向链表。  没有实现RandomAccess所以其以下标，随机访问元素速度较慢。
-         * 因其底层数据结构是链表，所以可想而知，它的增删只需要移动指针即可，故时间效率较高。不需要批量扩容，也不需要预留空间，所以空间效率比ArrayList高。
-         缺点就是需要随机访问元素时，时间效率很低，虽然底层在根据下标查询Node的时候，会根据index判断目标Node在前半段还是后半段，然后决定是顺序还是逆序查询，以提升时间效率。不过随着n的增大，总体时间效率依然很低。
-         当每次增、删时，都会修改modCount。
+             * LinkedList 是线程不安全的，允许元素为null的双向链表。  没有实现RandomAccess所以其以下标，随机访问元素速度较慢。
+             * 因其底层数据结构是链表，所以可想而知，它的增删只需要移动指针即可，故时间效率较高。不需要批量扩容，也不需要预留空间，所以空间效率比ArrayList高。
+             缺点就是需要随机访问元素时，时间效率很低，虽然底层在根据下标查询Node的时候，会根据index判断目标Node在前半段还是后半段，然后决定是顺序还是逆序查询，以提升时间效率。不过随着n的增大，总体时间效率依然很低。
+             当每次增、删时，都会修改modCount。
          */
         LinkedList l = new LinkedList();
         l.add(1);
         l.add(2);
         l.push(3);
         l.add(2,4);
-
+        l.get(1);
+        Arrays.sort(new int[]{});
         System.out.println(l);
     }
 
@@ -42,7 +43,6 @@ public class CollectionsTest {
         System.out.println(s3.hashCode());
         hm.put(s1,1);
         hm.put(s2,1);
-
         Object r1 = hm.get(s1);
         Object r2 = hm.get(s2);
         //因为linedhashmap 内置是一个 entry 的双向链表所以是有序的
@@ -52,6 +52,8 @@ public class CollectionsTest {
         //
         TreeMap treeMap  = new TreeMap();
         treeMap.put(1,1);
+        treeMap.get(1);
+        treeMap.remove(1);
         System.out.println(3&10);
         hm.put("1",1);
     }
