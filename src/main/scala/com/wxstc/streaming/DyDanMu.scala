@@ -1,10 +1,14 @@
 package com.wxstc.streaming
 
+import java.text.SimpleDateFormat
+import java.util.Date
+
 import com.wxstc.bean.Danmaku
 import com.wxstc.redis.JedisSingle
 import com.wxstc.util.{IKUtils, JsonUtils}
 import org.apache.log4j.Level
 import org.apache.spark.storage.StorageLevel
+import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.kafka.KafkaUtils
 import org.apache.spark.{HashPartitioner, SparkConf, SparkContext}
 import org.apache.spark.streaming.{Seconds, StreamingContext}
@@ -14,6 +18,7 @@ object DyDanMu {
   val updateFunc = (iter: Iterator[(String, Seq[Int], Option[Int])]) => {
     iter.flatMap { case (x, y, z) => Some(y.sum + z.getOrElse(0)).map(i => (x, i)) }
   }
+
 
   def main(args: Array[String]): Unit = {
 //    LoggerLevels.setStreamingLogLevels(Level.WARN)
@@ -119,6 +124,38 @@ object DyDanMu {
       }
       rddn
     })
+
+    var da: DStream[(String, (Int, Int))] = data.map(x => {
+      JsonUtils.jsonToPojo(x._2, classOf[Danmaku])
+    })
+      .filter(!_.isEmpty)
+      .map(x => {
+        (x.get.getSnick, (1,1))
+      })
+         .updateStateByKey[Tuple2[Int,Int]]((values: Seq[Tuple2[Int, Int]], state: Option[Tuple2[Int, Int]]) => {
+
+      val now: Date = new Date()
+      val dateFormat: SimpleDateFormat = new SimpleDateFormat("HH:mm")
+      val date = dateFormat.format(now)
+
+
+      var newValue = state.getOrElse(Tuple2[Int, Int](0, 0))
+//      if(date.equals("17:37")){
+//        newValue = Tuple2[Int, Int](0, 0)
+//      }
+      var up = newValue._1
+      var down = newValue._2
+      for (value <- values) {
+        up += value._1
+        down += value._2
+      }
+      date match {
+        case "17:37" => Option[Tuple2[Int,Int]](0, 0)
+        case _ => Option[Tuple2[Int,Int]](up, down)
+      }
+    })
+
+
     sortResult.print(1)
     live_danmuCount.print(1)
     user_live.print(1)
